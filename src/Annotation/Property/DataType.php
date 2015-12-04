@@ -12,6 +12,8 @@ namespace obo\Annotation\Property;
 
 class DataType extends \obo\Annotation\Base\Property {
 
+    protected static $datatypes = [];
+
     /**
      * @return string
      */
@@ -25,6 +27,18 @@ class DataType extends \obo\Annotation\Base\Property {
     public static function parametersDefinition() {
         return [self::PARAMETERS_NUMBER_DEFINITION => 1];
     }
+
+    public static function registerDatatype($dataTypeClassName, $forced = false) {
+        if (!$forced AND isset(self::$datatypes[$dataTypeClassName])) throw new \obo\Exceptions\Exception ("Can't register dataType with name " . $dataTypeClassName::name() .", is already registered");
+        if (!\is_subclass_of($dataTypeClassName, "\obo\Interfaces\IDataType")) throw new \obo\Exceptions\Exception("neni subklasou");
+        self::$datatypes[$dataTypeClassName] = $dataTypeClassName;
+    }
+
+    public function unregisterAnnotation($annotationClassName) {
+        if (!$this->existAnnotationWithNameForScope($annotationClassName::name(), $annotationClassName::scope())) throw new \obo\Exceptions\Exception ("Can't unregister annotation with name " . $annotationClassName::name() . " for scope " . $annotationClassName::scope() . ", is not registered");
+        unset($this->annotationsDefinitions[$annotationClassName::scope() . "-obo-" . $annotationClassName::name()]);
+    }
+
 
     /**
      * @param array $values
